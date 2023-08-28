@@ -1861,13 +1861,25 @@ textarea.w-input, textarea.w-select {
   position: relative;
 }
 
+.w-nav-button-wrapper {
+  float: right;
+  cursor: pointer;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  tap-highlight-color: rgba(0, 0, 0, 0);
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  padding: 18px;
+  font-size: 24px;
+  position: relative;
+}
+
 .w-nav-button:focus {
   outline: 0;
 }
 
 .w-nav-button.w--open {
-  color: #fff;
-  background-color: #c8c8c8;
+
 }
 
 .w-nav[data-collapse="all"] .w-nav-menu {
@@ -1903,6 +1915,17 @@ textarea.w-input, textarea.w-select {
 
   .w-nav-brand {
     padding-left: 10px;
+  }
+
+  .reward{
+    flex-direction: column;
+    align-items: center;
+
+  }
+
+
+  .reward .block_1{
+    margin-bottom: 50px;
   }
 }
 
@@ -2951,6 +2974,21 @@ p {
   height: 30px;
   color: #303030;
   background-color: #fff;
+  border-radius: 20px;
+  justify-content: center;
+  align-items: center;
+  font-family: Lato, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  transition: all .275s;
+  display: flex;
+}
+
+.button-5 {
+  width: 150px;
+  height: 30px;
+  color: #fff;
+  background-color: #dd9100;
   border-radius: 20px;
   justify-content: center;
   align-items: center;
