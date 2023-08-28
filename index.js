@@ -25,7 +25,7 @@ let connectWC = async () => {
   console.log("Your balance:", web3.utils.fromWei(balance, "ether"));
 };
 
-var disconnect = async () => {
+let disconnect = async () => {
   await provider.disconnect();
   console.log("wallet disconnected");
 };
