@@ -1,52 +1,86 @@
-const DISTRIBUTION_CONTRACT_ADDRESS = '';
-const FBT_TOKEN_CONTRACT_ADDRESS = '0x4727a02269943b225A7de9ef28496f36d454B983';
-const ETHERSCAN_API_KEY = 'YAUIENIVR8F922FXDIHGFEHTN18UMB5IRH';
-const URL = 'api.etherscan.io'
-const DISTRIBUTION_CONTRACT_ABI = [{"inputs":[{"internalType":"address","name":"_tokenAddress","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"inputs":[{"internalType":"uint256[]","name":"transactionAmounts","type":"uint256[]"},{"internalType":"uint256[]","name":"transactionTimestamps","type":"uint256[]"},{"internalType":"uint256","name":"userInitialBalance","type":"uint256"}],"name":"claim","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_account","type":"address"}],"name":"getUserLastClaimTimestamp","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"},{"internalType":"uint256[]","name":"amounts","type":"uint256[]"},{"internalType":"uint256[]","name":"timestamps","type":"uint256[]"},{"internalType":"uint256","name":"initialBalance","type":"uint256"}],"name":"pendingRewards","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"revenuePeriod","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_tokenAddress","type":"address"}],"name":"setTokenAddress","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"token","outputs":[{"internalType":"contract IERC20","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalRewardDistributed","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"userClaimTimestamp","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"stateMutability":"payable","type":"receive"}];
+const DISTRIBUTION_CONTRACT_ADDRESS = '0x7A562AaC8903cf4F50faf26AC301D5Ed3e65dAe6';
+const DISTRIBUTION_CONTRACT_ABI = [{"inputs":[{"internalType":"address","name":"_tokenAddress","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"inputs":[{"internalType":"address","name":"account","type":"address"},{"internalType":"uint256[]","name":"amounts","type":"uint256[]"},{"internalType":"uint256[]","name":"timestamps","type":"uint256[]"},{"internalType":"uint256","name":"initialBalance","type":"uint256"}],"name":"calculateShare","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"claim","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"components":[{"internalType":"address","name":"user","type":"address"},{"internalType":"uint256[]","name":"timestamp","type":"uint256[]"},{"internalType":"uint256[]","name":"amount","type":"uint256[]"},{"internalType":"uint256","name":"last24HourBalance","type":"uint256"}],"internalType":"struct RevenueDistributor.UserDetails[]","name":"_userDetails","type":"tuple[]"}],"name":"distribute","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"getLastDistributionTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"lastDistributionTimestamp","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"pendingRewards","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"revenuePeriod","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"rewardClaimable","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_tokenAddress","type":"address"}],"name":"setTokenAddress","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"token","outputs":[{"internalType":"contract IERC20","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalRewardDistributed","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"stateMutability":"payable","type":"receive"}]
 const connectButton1 = document.getElementById('btn-connect');
 const connectButton2 = document.getElementById('btn-connect1');
+const totalRewardContent = document.getElementById('t_reward');
+const pendingRewardContent = document.getElementById('pending_reward');
 
 let provider;
-let web3 = new Web3(provider);
+let web3;
 let selectedAccount;
-let contract;
-if(web3){
-    contract = new web3.eth.Contract(DISTRIBUTION_CONTRACT_ABI, DISTRIBUTION_CONTRACT_ADDRESS);
+
+
+function formatTime(secs) {
+  const seconds = Math.floor(secs);
+  const hours = Math.floor(seconds % 86400 / 3600);
+  const minutes = Math.floor((seconds % 86400) % 3600 / 60);
+  const remainingSeconds = seconds % 60;
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
 
-let getTxns =  async (address) =>{
+let getAccumulatedRewards = async () =>{
+  if (web3) {
+    const contract = new web3.eth.Contract(DISTRIBUTION_CONTRACT_ABI, DISTRIBUTION_CONTRACT_ADDRESS);
+    const accumulatedRewards = await contract.methods.totalRewardDistributed().call();
+    totalRewardContent.textContent = Number(web3.utils.fromWei(accumulatedRewards, 'ether'));
+    console.log("accumulatedRewards", accumulatedRewards)
+  }
+  else{
+    totalRewardContent.textContent = 0;
+  }
+}
+
+
+
+let pendingRewards = async () => {
+  if (web3) {
+    const contract = new web3.eth.Contract(DISTRIBUTION_CONTRACT_ABI, DISTRIBUTION_CONTRACT_ADDRESS);
+    const acct = await web3.eth.getAccounts();
+    const rewards = await contract.methods.pendingRewards(acct[0]).call();
+    pendingRewardContent.textContent = Number(web3.utils.fromWei(rewards, 'ether'));
+  }
+  else{
+    pendingRewardContent.textContent = "-----";
+  }
+}
+
+let refresh = async () => {
+    const web3_instance = new Web3(new Web3.providers.HttpProvider('https://mainnet.infura.io/v3/09046699d3b24685b819c3d6fd021a40'))
+    const contract = new web3_instance.eth.Contract(DISTRIBUTION_CONTRACT_ABI, DISTRIBUTION_CONTRACT_ADDRESS);
+    const nextRefresh = await contract.methods.getLastDistributionTime().call();
+    const target = Number(nextRefresh) + 86400;
+    const  currenTime = Math.floor(Date.now() / 1000);
+    const countdown_sec = target - currenTime;
+    countdown_sec >= 0 ? countdown_sec : 0; 
+    
+    document.getElementById('countDown').textContent = formatTime(countdown_sec);
+    document.getElementById('countDown1').textContent = formatTime(countdown_sec);
+}
+
+refresh()
+
+
+let claim = async () => {
+  try {
     if (web3) {
-        const lastClaimTime = await contract.methods.getUserLastClaimTimestamp(address).call();
-        const currentTimestamp = Math.floor(Date.now() / 1000);
-        const twentyFourHoursAgoTimestamp = currentTimestamp - 24 * 60 * 60;
-        const timestamp = Number(lastClaimTime) == 0 ? twentyFourHoursAgoTimestamp : Number(lastClaimTime);
-    
-        const apiUrl = `https://api.etherscan.io/api?module=account&action=tokentx&address=${address}&contractaddress=${FBT_TOKEN_CONTRACT_ADDRESS}&startblock=${timestamp}&endblock=latest&sort=asc&apikey=${ETHERSCAN_API_KEY}`;
-    
-        try {
-            const response = await axios.get(apiUrl);
-            const tokenTransfers = response.data.result;
-            const filteredTxns = tokenTransfers.filter(transfer => {
-                return (
-                    transfer.to.toLowerCase() === address.toLowerCase()
-                );
-            });
-    
-            return filteredTxns;
-        } catch (error) {
-            console.error('Error retrieving token transfers:', error.message);
-            return [];
-        }
+      const acct = await web3.eth.getAccounts();
+      const contract = new web3.eth.Contract(DISTRIBUTION_CONTRACT_ABI, DISTRIBUTION_CONTRACT_ADDRESS);
+
+      await contract.methods.claim().send({ from: acct[0] });            
+    } else {
+        console.log('web3 instance not found.');
     }
-    return [];
+  } catch (error) {
+      console.error('Error claiming rewards:', error.message);
+  }
 }
 
-let getAccumulatedRewards = async (address) =>{}
 
-let pendingRewards = async (address) => {}
-
-
-let claim = async (address) => {}
+setInterval(async () => {
+  await getAccumulatedRewards();
+  await pendingRewards();
+  refresh();
+}, 1000);
 
 
 
@@ -84,7 +118,7 @@ function init() {
 async function fetchAccountData() {
 
   // Get a Web3 instance for the wallet
-  const web3 = new Web3(provider);
+  web3 = new Web3(provider);
 
   const isConnected = provider.isConnected();
   if (isConnected) {
@@ -93,16 +127,18 @@ async function fetchAccountData() {
     connectButton1.removeEventListener('click', onConnect);
     connectButton1.addEventListener('click', onDisconnect);
     connectButton2.removeEventListener('click', onConnect);
-    connectButton2.addEventListener('click', onDisconnect);
+    connectButton2.addEventListener('click', claim);
   } else {
     connectButton1.textContent = 'Connect Wallet';
     connectButton2.textContent = 'Connect Wallet';
     connectButton1.removeEventListener('click', onDisconnect);
     connectButton1.addEventListener('click', onConnect);
-    connectButton2.removeEventListener('click', onDisconnect);
+    connectButton2.removeEventListener('click', claim);
     connectButton2.addEventListener('click', onConnect);
   }
 
+  await pendingRewards();
+  await getAccumulatedRewards();  
   console.log("Web3 instance is", web3);
 
   // Get list of accounts of the connected wallet
@@ -155,8 +191,11 @@ async function onDisconnect() {
     connectButton2.textContent = 'Connect Wallet';
     connectButton1.removeEventListener('click', onDisconnect);
     connectButton1.addEventListener('click', onConnect);
-    connectButton2.removeEventListener('click', onDisconnect);
+    connectButton2.removeEventListener('click', claim);
     connectButton2.addEventListener('click', onConnect);
+    await pendingRewards();
+  await getAccumulatedRewards();
+  
 }
 
 
