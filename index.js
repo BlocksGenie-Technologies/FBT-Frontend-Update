@@ -7,7 +7,6 @@ const pendingRewardContent = document.getElementById('pending_reward');
 
 let provider;
 let web3;
-let selectedAccount;
 
 
 function formatTime(secs) {
@@ -22,8 +21,7 @@ let getAccumulatedRewards = async () =>{
   if (web3) {
     const contract = new web3.eth.Contract(DISTRIBUTION_CONTRACT_ABI, DISTRIBUTION_CONTRACT_ADDRESS);
     const accumulatedRewards = await contract.methods.totalRewardDistributed().call();
-    totalRewardContent.textContent = Number(web3.utils.fromWei(accumulatedRewards, 'ether')).toFixed(2);
-    console.log("accumulatedRewards", accumulatedRewards)
+    totalRewardContent.textContent = Number(web3.utils.fromWei(accumulatedRewards, 'ether')).toFixed(5);
   }
 }
 
@@ -34,7 +32,7 @@ let pendingRewards = async () => {
     const contract = new web3.eth.Contract(DISTRIBUTION_CONTRACT_ABI, DISTRIBUTION_CONTRACT_ADDRESS);
     const acct = await web3.eth.getAccounts();
     const rewards = await contract.methods.pendingRewards(acct[0]).call();
-    pendingRewardContent.textContent = Number(web3.utils.fromWei(rewards, 'ether')).toFixed(2);
+    pendingRewardContent.textContent = Number(web3.utils.fromWei(rewards, 'ether')).toFixed(5);
   }
 }
 
@@ -43,10 +41,9 @@ let refresh = async () => {
     const contract = new web3_instance.eth.Contract(DISTRIBUTION_CONTRACT_ABI, DISTRIBUTION_CONTRACT_ADDRESS);
     const nextRefresh = await contract.methods.getLastDistributionTime().call();
     const target = Number(nextRefresh) + 86400;
-    const  currenTime = Math.floor(Date.now() / 1000);
-    const countdown_sec = target - currenTime;
+    const currenTime = Math.floor(Date.now() / 1000);
+    const countdown_sec =  Number(nextRefresh) == 0 ? 0 : target - currenTime;
     countdown_sec >= 0 ? countdown_sec : 0; 
-    
     document.getElementById('countDown').textContent = formatTime(countdown_sec);
     document.getElementById('countDown1').textContent = formatTime(countdown_sec);
 }
@@ -87,8 +84,6 @@ let web3Modal
 
 function init() {
 
-  console.log("Initializing example");
-  console.log("WalletConnectProvider is", WalletConnectProvider);
   const providerOptions = {
     walletconnect: {
       package: WalletConnectProvider,
@@ -133,13 +128,6 @@ async function fetchAccountData() {
 
   await pendingRewards();
   await getAccumulatedRewards();  
-  console.log("Web3 instance is", web3);
-
-  // Get list of accounts of the connected wallet
-  const accounts = await web3.eth.getAccounts();
-
-  console.log("Got accounts", accounts);
-  selectedAccount = accounts[0];
 }
 
 
@@ -180,7 +168,6 @@ async function onDisconnect() {
     await web3Modal.clearCachedProvider();
     provider = null;
 
-    selectedAccount = null;
     connectButton1.textContent = 'Connect Wallet';
     connectButton2.textContent = 'Connect Wallet';
     connectButton1.removeEventListener('click', onDisconnect);
