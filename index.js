@@ -22,11 +22,8 @@ let getAccumulatedRewards = async () =>{
   if (web3) {
     const contract = new web3.eth.Contract(DISTRIBUTION_CONTRACT_ABI, DISTRIBUTION_CONTRACT_ADDRESS);
     const accumulatedRewards = await contract.methods.totalRewardDistributed().call();
-    totalRewardContent.textContent = Number(web3.utils.fromWei(accumulatedRewards, 'ether'));
+    totalRewardContent.textContent = Number(web3.utils.fromWei(accumulatedRewards, 'ether')).toFixed(2);
     console.log("accumulatedRewards", accumulatedRewards)
-  }
-  else{
-    totalRewardContent.textContent = 0;
   }
 }
 
@@ -37,10 +34,7 @@ let pendingRewards = async () => {
     const contract = new web3.eth.Contract(DISTRIBUTION_CONTRACT_ABI, DISTRIBUTION_CONTRACT_ADDRESS);
     const acct = await web3.eth.getAccounts();
     const rewards = await contract.methods.pendingRewards(acct[0]).call();
-    pendingRewardContent.textContent = Number(web3.utils.fromWei(rewards, 'ether'));
-  }
-  else{
-    pendingRewardContent.textContent = "-----";
+    pendingRewardContent.textContent = Number(web3.utils.fromWei(rewards, 'ether')).toFixed(2);
   }
 }
 
