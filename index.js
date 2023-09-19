@@ -13,10 +13,11 @@ let web3;
 
 function formatTime(secs) {
   const seconds = Math.floor(secs);
+  const days = Math.floor(seconds / 86400 );
   const hours = Math.floor(seconds % 86400 / 3600);
   const minutes = Math.floor((seconds % 86400) % 3600 / 60);
   const remainingSeconds = seconds % 60;
-  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  return `${days.toString().padStart(2, '0')}:${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
 
 let getAccumulatedRewards = async () =>{
@@ -42,7 +43,7 @@ let refresh = async () => {
     const web3_instance = new Web3(new Web3.providers.HttpProvider('https://mainnet.infura.io/v3/09046699d3b24685b819c3d6fd021a40'))
     const contract = new web3_instance.eth.Contract(DISTRIBUTION_CONTRACT_ABI, DISTRIBUTION_CONTRACT_ADDRESS);
     const nextRefresh = await contract.methods.getLastDistributionTime().call();
-    const target = Number(nextRefresh) + 86400;
+    const target = Number(nextRefresh) + 1209600;
     const currenTime = Math.floor(Date.now() / 1000);
     const countdown_sec =  Number(nextRefresh) == 0 ? 0 : target - currenTime;
     countdown_sec >= 0 ? countdown_sec : 0; 
